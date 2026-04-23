@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Egzaminów - Filozofia</title>
+
+    <!-- Tailwind CSS (Styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel (Kompilator JSX w przeglądarce) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Reguły wymuszające łamanie stron przy wydruku */
+        @media print {
+            body { background-color: white !important; }
+            .page-break { page-break-after: always; break-after: page; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-serif">
+
+<!-- Kontener aplikacji React -->
+<div id="root"></div>
+
+<script type="text/babel">
+    const { useState } = React;
+
+    // --- IKONY SVG (Zastępstwo dla zewnętrznej biblioteki lucide-react) ---
+    const IconFileText = ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+    );
+    const IconPrinter = ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    );
+    const IconSettings = ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    );
+    const IconCheckSquare = ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    );
+    const IconAlertTriangle = ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    );
+
+    // --- BAZA PYTAŃ ---
+    const rawQuestions = [
+        { id: 1, q: 'Gdy rozważasz, czy stół, przy którym siedzisz, jest w istocie zbiorem wirujących atomów, czy może tylko wyobrażeniem w Twoim umyśle – badasz naturę rzeczywistości i strukturę bytu. Ten dział filozofii to:', options: ['Epistemologia', 'Estetyka', 'Ontologia', 'Etyka'], ans: 2 },
+        { id: 2, q: 'Filozofia wywodzi się z przejścia od wyjaśniania świata za pomocą mitów i kaprysów bogów do racjonalnego, logicznego myślenia. To historyczne przejście nazywamy potocznie przejściem:', options: ['Od Chaosu do Kosmosu.', 'Od Mitu do Logosu.', 'Od Jaskini do Światła.', 'Od Homera do Homera Simpsona.'], ans: 1 },
+        { id: 3, q: 'Tales z Miletu szukał "arche", czyli prazasady wszystkiego, z której powstał świat. Doszedł do wniosku, że jest to:', options: ['Ogień, bo wszystko płonie.', 'Liczba, bo natura rzeczywistości jest matematyczna.', 'Woda, bo życie potrzebuje wilgoci, a Ziemia unosi się na oceanie.', 'Powietrze, bo bez niego nie da się oddychać.'], ans: 2 },
+        { id: 4, q: 'Twój kolega narzeka, że "nic nie jest już takie samo", a "czas ucieka i wszystko się zmienia". Z którym filozofem z Efezu, autorem słów "Panta rhei" (wszystko płynie), na pewno by się dogadał?', options: ['Z Parmenidesem', 'Z Heraklitem', 'Z Anaksymenesem', 'Z Demokrytem'], ans: 1 },
+        { id: 5, q: 'Gdyby Parmenides był Twoim nauczycielem wuefu, prawdopodobnie kazałby Ci usiąść w ławce. Dlaczego?', options: ['Uważał, że byt jest, niebytu nie ma, a ponieważ ruch wymaga "pustki", to ruch jest logicznie niemożliwy.', 'Wierzył, że sport oddala nas od Idei Dobra.', 'Był materialistą i uważał, że mięśnie to tylko atomy.', 'Twierdził, że jedyny prawdziwy ruch to pływanie.'], ans: 0 },
+        { id: 6, q: 'Achilles ścigający żółwia to słynny paradoks, który miał dowodzić, że ruch nie istnieje. Kto wymyślił tę logiczną łamigłówkę?', options: ['Platon', 'Sokrates', 'Zenon z Elei', 'Arystoteles'], ans: 2 },
+        { id: 7, q: '"Wszystko składa się z małych, niewidzialnych i niepodzielnych klocków". Kto w starożytności brzmiał jak współczesny fizyk kwantowy bawiący się LEGO?', options: ['Pitagoras', 'Demokryt z Abdery', 'Epikur', 'Anaksymander'], ans: 1 },
+        { id: 8, q: 'Pitagorejczycy mieli obsesję na punkcie matematyki. Uważali, że zasada świata (arche) to nie żadna woda czy ogień, ale:', options: ['Złoto', 'Liczba i proporcja', 'Muzyka sfer', 'Bóg jako demiurg'], ans: 1 },
+        { id: 9, q: 'Sofiści (jak Protagoras) byli w starożytności kimś w rodzaju płatnych korepetytorów i adwokatów. Nauczali m.in. erystyki. Co to takiego?', options: ['Sztuka logicznego poszukiwania prawdy.', 'Sztuka układania wierszy.', 'Sztuka wygrywania sporów i przekonywania do swoich racji za wszelką cenę.', 'Sztuka rzeźbienia w marmurze.'], ans: 2 },
+        { id: 10, q: 'Protagoras powiedział: "Człowiek jest miarą wszechrzeczy". Gdybyś pokłócił się z nim o to, czy pizza z ananasem jest dobra, on by odpowiedział:', options: ['"Prawda jest jedna! Ananas to zbrodnia w świecie Idei!"', '"Zależy dla kogo. Nie ma obiektywnej prawdy, prawda jest względna."', '"Zapytajmy wyroczni."', '"Pizza nie istnieje, to atomy."'], ans: 1 },
+        { id: 11, q: 'Sokrates denerwował ludzi, zadając im tyle pytań, aż sami gubili się w swoich poglądach i odkrywali swą niewiedzę. Ta metoda nosi nazwę:', options: ['Metody majeutycznej', 'Metody elenktycznej (ironii sokratycznej)', 'Metody dedukcyjnej', 'Metody empirycznej'], ans: 1 },
+        { id: 12, q: 'Jeśli po uświadomieniu sobie niewiedzy, Sokrates pomagał rozmówcy "urodzić" nową, prawdziwą wiedzę ukrytą w jego duszy, to stosował metodę:', options: ['Majeutyczną (położniczą)', 'Sceptyczną', 'Cyniczną', 'Sylogistyczną'], ans: 0 },
+        { id: 13, q: '"Wiem, że nic nie wiem". Słynne zdanie przypisywane Sokratesowi oznacza w praktyce, że:', options: ['Był bardzo słabym uczniem.', 'Nie posiada boskiej wiedzy, ale w przeciwieństwie do głupców, jest świadomy swoich ograniczeń.', 'Człowiek rodzi się jako czysta karta.', 'Wiedza nie ma żadnego znaczenia.'], ans: 1 },
+        { id: 14, q: 'Uczeń ściąga na teście. Sokrates mówi: "Nikt nie czyni zła dobrowolnie. Zgrzeszyłeś z powodu niewiedzy, czym jest Prawdziwe Dobro". Ten pogląd to:', options: ['Hedonizm', 'Intelektualizm etyczny', 'Fatalizm', 'Złoty Środek'], ans: 1 },
+        { id: 15, q: 'Świat, który widzimy dookoła, to zdaniem Platona tylko nędzna podróbka. Gdzie według niego znajdują się idealne, ponadczasowe wzorce wszystkich rzeczy?', options: ['W umyśle Arystotelesa', 'W jaskini', 'W Świecie Idei', 'Na górze Olimp'], ans: 2 },
+        { id: 16, q: 'W micie o jaskini Platona, więźniowie patrzą na cienie rzucane na ścianę. Czym jest wyjście z jaskini na zewnątrz, w blask słońca?', options: ['Odkryciem ognia.', 'Drogą do prawdy i poznaniem Idei Dobra.', 'Dowodem obrotu Ziemi.', 'Ucieczką przed obowiązkami.'], ans: 1 },
+        { id: 17, q: 'Miłość platoniczna (Eros) w swoim pierwotnym, filozoficznym znaczeniu, to:', options: ['Miłość oparta na kalkulacji.', 'Droga dążenia duszy: od zachwytu pięknym ciałem, do czystej Idei Piękna.', 'Uczucie tylko dla władców.', 'Miłość do samego siebie.'], ans: 1 },
+        { id: 18, q: 'W utopijnym Państwie Platona, kto powinien rządzić i sprawować władzę absolutną (bo jako jedyny poznał Ideę Dobra)?', options: ['Żołnierze', 'Filozofowie', 'Rzemieślnicy', 'Obywatele (demokracja)'], ans: 1 },
+        { id: 19, q: 'Według Arystotelesa, każda rzecz składa się z materii (np. drewno). Co jest drugim elementem, który nadaje jej ostateczny kształt i właściwości?', options: ['Arche', 'Forma', 'Dusza', 'Apeiron'], ans: 1 },
+        { id: 20, q: 'Ten pogląd Arystotelesa, mówiący o nierozerwalnym połączeniu materii i formy w każdej rzeczy, nosi nazwę:', options: ['Hylemorfizm', 'Dualizm', 'Monizm', 'Panteizm'], ans: 0 },
+        { id: 21, q: 'Arystoteles uważał, że cnota i dobre życie leży pośrodku między skrajnościami (nadmiarem a brakiem). Ta teoria to:', options: ['Zasada Brzytwy Ockhama', 'Doktryna Złotego Środka', 'Ataraksja', 'Imperatyw kategoryczny'], ans: 1 },
+        { id: 22, q: 'Będąc na diecie, masz ochotę zjeść 10 paczek chipsów. Epikur podszedłby do Ciebie i powiedział:', options: ['"Zjedz, życie to tylko cierpienie!"', '"Zjedz, ciągła rozkosz to cel życia."', '"Nie jedz, nastąpi ból brzucha i niepokój. Prawdziwa przyjemność to brak cierpienia ciała (aponia) i spokój duszy (ataraksja)!"', '"Chipsy nie istnieją."'], ans: 2 },
+        { id: 23, q: 'Wielu ludzi kojarzy epikurejczyków z niekończącą się ucztą. Tymczasem sam Epikur uważał, że do szczęścia najbardziej potrzebujemy:', options: ['Ogromnego majątku.', 'Władzy politycznej.', 'Zwykłego chleba, wody i grona zaufanych przyjaciół.', 'Ciągłych podróży.'], ans: 2 },
+        { id: 24, q: 'Spóźniłeś się na autobus i pada deszcz. Filozof stoicki poradziłby Ci:', options: ['"Idź protestować."', '"Nie masz wpływu na awarie, ale masz kontrolę nad swoją reakcją. Skup się na tym, na co masz wpływ."', '"Zamieszkaj w beczce."', '"Przeznaczenie jest złe, walcz z nim."'], ans: 1 },
+        { id: 25, q: 'Cynik, Diogenes z Synopy, biegał za dnia z latarnią i mówił, że "szuka człowieka". Co przez to chciał wyrazić?', options: ['Że brakuje ulicznych latarń.', 'Wyśmiewał zepsute, pędzące za bogactwem społeczeństwo, uważając, że zatracili oni wolną, naturalną naturę.', 'Że słońce zgaśnie.', 'Prowadził eksperymenty wzrokowe.'], ans: 1 },
+        { id: 26, q: 'W dyskusji o tym, czy obcy istnieją, Sceptyk napisałby komentarz:', options: ['"Znam prawdę, zaraz ją wyłożę."', '"Zawieszam swój sąd (epoche). Umysł ludzki nie może tego rozstrzygnąć, wolę święty spokój (ataraksję)."', '"Obcy to idee Platona."', '"Udowodnię, że wy wszyscy się mylicie."'], ans: 1 },
+        { id: 27, q: 'Słyszysz: "Wszyscy ludzie są śmiertelni. Sokrates jest człowiekiem. Więc Sokrates jest śmiertelny." Ten klasyczny schemat logicznego wnioskowania Arystotelesa, to:', options: ['Paradoks', 'Sylogizm', 'Aporia', 'Błędne koło'], ans: 1 },
+        { id: 28, q: 'Twój rozmówca mówi: "Uważam, że nie ma jednej, obiektywnej prawdy. Każdy ma po prostu swoją własną". Taka postawa to:', options: ['Dogmatyzm', 'Dualizm', 'Relatywizm poznawczy', 'Intelektualizm etyczny'], ans: 2 },
+        { id: 29, q: 'Dualizm ontologiczny (popularny u Platona) polega na wierze, że:', options: ['Świat składa się tylko z materii.', 'Świat i człowiek dzieli się na dwa wymiary: fizyczne ciało i niematerialną duszę.', 'W państwie musi być 2 królów.', 'Świat to woda i ogień.'], ans: 1 },
+        { id: 30, q: 'Św. Tomasz z Akwinu chciał połączyć racjonalny rozum z wiarą religijną. Jego najsłynniejsze dokonanie to:', options: ['Opisanie struktury piekła.', 'Sformułowanie 5 racjonalnych dróg (dowodów) na istnienie Boga (np. argument pierwszego poruszyciela).', 'Teoria o reinkarnacji.', 'Odrzucenie pism Arystotelesa.'], ans: 1 },
+        { id: 31, q: 'Tłumaczysz komuś: "Ta książka jest bardzo usypiająca, ponieważ ma silne właściwości powodujące zasypianie". Jaki błąd tu widać?', options: ['Błędne koło (Idem per idem / tłumaczenie tego samego przez to samo).', 'Atak personalny (argumentum ad hominem).', 'Dowód z niewiedzy.', 'Aporia.'], ans: 0 },
+        { id: 32, q: 'Święty Augustyn mierzył się z pytaniem: skoro Bóg jest dobry, skąd wzięło się zło? Filozof odpowiedział, że:', options: ['Zło to bóg ciemności walczący z Bogiem światła.', 'To wina kosmitów.', 'Zło samo w sobie nie istnieje. Jest jedynie brakiem lub zepsuciem dobra (jak ciemność to tylko brak światła).', 'Świat zawsze był zły.'], ans: 2 },
+        { id: 33, q: 'Zjedzenie talerza ciepłej, pospolitej zupy, gdy jesteśmy głodni, to w klasyfikacji Epikura poszukiwanie przyjemności:', options: ['Naturalnej i koniecznej.', 'Naturalnej, ale niekoniecznej.', 'Nienaturalnej i niekoniecznej (próżnej).', 'Czysto abstrakcyjnej.'], ans: 0 },
+        { id: 34, q: 'Zgodnie z klasyczną etyką stoicką, mądry człowiek powinien żyć:', options: ['Zgodnie z namiętnościami ciała.', 'Zgodnie z naturą (Logosem), używając rozumu do zapanowania nad nieuporządkowanymi emocjami.', 'Odludnie, w jaskini.', 'Buntując się na niesprawiedliwość losu.'], ans: 1 },
+        { id: 35, q: 'Kiedy znajomy fan black metalu twierdzi, że "nic nie ma sensu, wiedza to iluzja, obiektywna moralność i prawda to mit", prezentuje on stanowisko zwane:', options: ['Dogmatyzmem', 'Empiryzmem', 'Nihilizmem', 'Optymizmem'], ans: 2 },
+        { id: 36, q: 'Arystoteles uznał, że ze względu na fakt używania mowy (rozumu) człowiek z natury musi dążyć do tworzenia grup i państw. Nazwał go:', options: ['Homo faber', 'Homo ludens', 'Zoon politikon (zwierzę polityczne/społeczne)', 'Homo sapiens'], ans: 2 },
+        { id: 37, q: 'Sokrates opowiadał, że postępuje uczciwie, ponieważ słucha swojego wewnętrznego, duchowego głosu (sumienia). Nazywał go:', options: ['Logos', 'Daimonion', 'Apeiron', 'Ataraksja'], ans: 1 },
+        { id: 38, q: 'Czym dokładnie i konkretnie zajmuje się gałąź filozofii zwana epistemologią?', options: ['Ocenianiem sztuki.', 'Teorią poznania: badaniem źródeł, granic i prawdziwości naszej wiedzy (np. sporem zmysły vs rozum).', 'Organizacją państwa.', 'Etyką chrześcijańską.'], ans: 1 },
+        { id: 39, q: 'W dyskusji o ochronie klimatu atakujesz oponenta, wypominając mu wiek i fryzurę, ignorując sam temat ocieplenia. Stosujesz błąd logiczny:', options: ['Ignoratio elenchi.', 'Argumentum ad hominem (atak na człowieka).', 'Brzytwę Ockhama.', 'Panta rhei.'], ans: 1 },
+        { id: 40, q: 'Jeżeli uważasz, że zmysły (wzrok, dotyk) nieustannie kłamią, a jedynym w 100% pewnym źródłem wiedzy jest chłodna kalkulacja i czysty rozum, to jesteś:', options: ['Empirystą', 'Racjonalistą', 'Nihilistą', 'Fizykiem'], ans: 1 },
+        { id: 41, q: 'Platon w utopijnym "Państwie" podzielił obywateli na trzy grupy (kasty), pasujące do części ludzkiej duszy. Były to warstwy:', options: ['Nauczycieli, uczniów, rzemieślników.', 'Władców (filozofów), Strażników (wojowników) i żywicieli (chłopów/rzemieślników).', 'Niewolników i szlachty.', 'Króla i kapłanów.'], ans: 1 },
+        { id: 42, q: 'Pamiętamy Go jako jedną z najważniejszych postaci w dziejach, jednak on sam uważał pisanie tekstów za "zabijanie myśli" i nie spisał ani jednego słowa. To:', options: ['Tales', 'Arystoteles', 'Sokrates', 'św. Tomasz'], ans: 2 },
+        { id: 43, q: 'Arystoteles uporządkował i spisał niezawodne zasady bezbłędnego rozumowania (jak zasada niesprzeczności). Uważa się go za ojca dziedziny zwanej:', options: ['Astrologią', 'Logiką formalną', 'Fizyką kwantową', 'Erystyką'], ans: 1 },
+        { id: 44, q: 'Klasyczna (tzw. arystotelesowska) definicja prawdy, wykorzystywana również w dzisiejszych sądach, uważa, że zdanie "Pada deszcz" jest prawdziwe tylko wtedy, gdy:', options: ['Wszyscy uwierzą, że pada deszcz.', 'Zapewnia to nam korzyść.', 'Istnieje zgodność naszego osądu z rzeczywistym, faktycznym stanem pogody za oknem.', 'Wymyślił to Platon.'], ans: 2 },
+        { id: 45, q: 'Zgodnie z tradycją słowo "filozofia" ukuł Pitagoras. Oznacza ono dosłownie i wprost:', options: ['Wszechwiedzę.', 'Umiłowanie (phileo) mądrości (sophia).', 'Odkrywanie prawd ukrytych.', 'Rozmowę w tłumie.'], ans: 1 },
+        { id: 46, q: 'Zalecane przez starożytnych Sceptyków "epoche", które miało zminimalizować ból egzystencjalny, polega na:', options: ['Ciągłym zawieszaniu i powstrzymywaniu się od wydawania pochopnych sądów, by zachować spokój.', 'Wspinaczce na święte góry.', 'Łamaniu niesprawiedliwego prawa.', 'Codziennych kąpielach w lodowatej wodzie.'], ans: 0 },
+        { id: 47, q: 'Słynny rzymski cesarz, który zwykł pisać w wojskowym namiocie. Autor m.in. słów: "Podobny bądź do skały, o którą się ciągle fale rozbijają. A ona stoi, a koło niej usypiają bałwany wody." (Rozmyślania). Jest to:', options: ['Marek Aureliusz (Stoik)', 'Epikur z Samos (Hedonista)', 'Diogenes z Synopy (Cynik)', 'Protagoras z Abdery (Sofista)'], ans: 0 },
+        { id: 48, q: 'Aporia – np. łamigłówka Zenona o strzale w locie – w sensie filozoficznym i intelektualnym oznacza:', options: ['Ulicę w Atenach.', 'Logiczny kłopot, zagadnienie bez widocznego wyjścia, często pełne pozornie nierozwiązywalnych sprzeczności.', 'Duchowe oczyszczenie w teatrze (Katharsis).', 'Picie wina na ucztach.'], ans: 1 },
+        { id: 49, q: 'Pierwsi filozofowie tzw. "presokratycy" rozważali czy wszechświat powstał z żywiołu wody, ognia lub powietrza, tudzież bezkresu. Współcześnie ich odpowiednikiem są zatem naukowcy z wydziału:', options: ['Socjologii', 'Fizyki, chemii i nauk o przyrodzie (np. kosmologii)', 'Psychologii zwierząt', 'Sztuk Pięknych'], ans: 1 },
+        { id: 50, q: 'Wyobraź sobie, że stoisz po stronie poglądu iż "nasz mózg przy narodzinach to kompletnie czysta, niezapisana pusta karta (tabula rasa), a każdą wiedzę dostarczamy sobie WYŁĄCZNIE używając rąk, uszu i wzroku w realnym świecie." Popierasz tym samym:', options: ['Empiryzm', 'Dualizm idealny', 'Nihilizm', 'Solipsyzm'], ans: 0 }
+    ];
+
+    // --- LOGIKA APLIKACJI ---
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    const shuffleArray = (array) => {
+        const newArr = [...array];
+        for (let i = newArr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        }
+        return newArr;
+    };
+
+    function TestGenerator() {
+        const [variationsCount, setVariationsCount] = useState(2);
+        const [questionsPerTest, setQuestionsPerTest] = useState(12);
+        const [generatedData, setGeneratedData] = useState(null);
+
+        const handleGenerate = () => {
+            if (questionsPerTest < 1 || questionsPerTest > rawQuestions.length) {
+                alert(`Liczba pytań musi być w przedziale 1-${rawQuestions.length}`);
+                return;
+            }
+
+            const newTests = [];
+            const newKeys = [];
+
+            for (let i = 0; i < variationsCount; i++) {
+                const shuffled = shuffleArray(rawQuestions);
+                const selectedQuestions = shuffled.slice(0, questionsPerTest);
+
+                newTests.push({
+                    variantName: `Grupa ${alphabet[i % alphabet.length]}`,
+                    questions: selectedQuestions
+                });
+
+                const variantKey = selectedQuestions.map((q, idx) => {
+                    const optionLetters = ['A', 'B', 'C', 'D'];
+                    return `${idx + 1}. ${optionLetters[q.ans]}`;
+                });
+                newKeys.push({
+                    variantName: `Grupa ${alphabet[i % alphabet.length]}`,
+                    answers: variantKey
+                });
+            }
+
+            setGeneratedData({ tests: newTests, keys: newKeys });
+        };
+
+        const handlePrint = () => {
+            window.print();
+        };
+
+        return (
+            <div className="min-h-screen bg-slate-100 font-serif text-slate-900 print:bg-white print:p-0">
+
+                {/* UI KONFIGURACYJNE (UKRYTE PODCZAS DRUKOWANIA) */}
+                <div className="print:hidden p-6 max-w-4xl mx-auto py-10">
+                    <div className="bg-white rounded-xl shadow-lg p-8">
+                        <div className="flex items-center space-x-4 mb-6 border-b pb-4 border-slate-100">
+                            <div className="bg-slate-800 p-3 rounded-lg">
+                                <IconSettings className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-bold font-sans text-slate-800">Generator Sprawdzianów</h1>
+                                <p className="text-slate-500 font-sans text-sm">Fabryka łez (i ocen niedostatecznych)</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 font-sans">
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Ile wariantów wygenerować? (np. Grupa A, B, C...)
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="26"
+                                    value={variationsCount}
+                                    onChange={(e) => setVariationsCount(Number(e.target.value))}
+                                    className="w-full border border-slate-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Ile pytań na sprawdzian? (Max: {rawQuestions.length})
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max={rawQuestions.length}
+                                    value={questionsPerTest}
+                                    onChange={(e) => setQuestionsPerTest(Number(e.target.value))}
+                                    className="w-full border border-slate-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-slate-800"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex space-x-4 font-sans">
+                            <button
+                                onClick={handleGenerate}
+                                className="flex items-center space-x-2 bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                            >
+                                <IconFileText className="w-5 h-5" />
+                                <span>Generuj arkusze</span>
+                            </button>
+
+                            {generatedData && (
+                                <button
+                                    onClick={handlePrint}
+                                    className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                                >
+                                    <IconPrinter className="w-5 h-5" />
+                                    <span>Drukuj</span>
+                                </button>
+                            )}
+                        </div>
+
+                        {generatedData && (
+                            <div className="mt-6 p-4 bg-amber-50 text-amber-800 rounded-lg flex items-start space-x-3 text-sm font-sans">
+                                <IconAlertTriangle className="w-5 h-5 shrink-0" />
+                                <p>Podgląd arkuszy znajdziesz poniżej. Użyj przycisku "Drukuj" aby wywołać okno systemowe. Pamiętaj, aby w opcjach drukowania wyłączyć nagłówki/stopki dodawane przez przeglądarkę, by arkusz wyglądał profesjonalnie.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* STREFA WYDRUKU */}
+                {generatedData && (
+                    <div className="max-w-4xl mx-auto print:max-w-full">
+                        {/* Arkusze dla uczniów */}
+                        {generatedData.tests.map((test, index) => (
+                            <div
+                                key={`test-${index}`}
+                                className="bg-white p-10 print:p-4 mb-8 shadow-md print:shadow-none print:mb-0 relative page-break"
+                            >
+                                <div className="border-b-2 border-slate-800 mb-8 pb-4">
+                                    <div className="flex justify-between items-end mb-4">
+                                        <h2 className="text-3xl font-bold uppercase tracking-wider">Egzamin z filozofii</h2>
+                                        <div className="text-xl font-bold border-2 border-slate-800 px-4 py-2 rounded">
+                                            Wariant: {test.variantName}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-between text-lg mt-6">
+                                        <div className="flex-1 flex items-end">
+                                            <span>Imię i nazwisko:</span>
+                                            <div className="border-b border-slate-500 ml-2 flex-1"></div>
+                                        </div>
+                                        <div className="w-32 flex items-end ml-6">
+                                            <span>Klasa:</span>
+                                            <div className="border-b border-slate-500 ml-2 flex-1"></div>
+                                        </div>
+                                        <div className="w-48 flex items-end ml-6">
+                                            <span>Data:</span>
+                                            <div className="border-b border-slate-500 ml-2 flex-1"></div>
+                                        </div>
+                                        <div className="w-32 flex items-end ml-6">
+                                            <span>Ocena:</span>
+                                            <div className="border-b border-slate-500 ml-2 flex-1"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {test.questions.map((q, qIndex) => (
+                                        <div key={q.id} className="break-inside-avoid">
+                                            <p className="font-semibold text-[11pt] leading-snug mb-2">
+                                                {qIndex + 1}. {q.q}
+                                            </p>
+                                            <div className="pl-6 space-y-1">
+                                                {q.options.map((opt, oIndex) => {
+                                                    const letter = ['A', 'B', 'C', 'D'][oIndex];
+                                                    return (
+                                                        <div key={oIndex} className="text-[11pt] flex items-start">
+                                                            <span className="font-bold mr-2">{letter}.</span>
+                                                            <span>{opt}</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Sekcja zasad oceniania na dole arkusza */}
+                                <div className="mt-12 pt-6 border-t-2 border-slate-300 print:border-slate-800 break-inside-avoid">
+                                    <h3 className="font-bold text-lg mb-2 uppercase tracking-wider">Zasady oceniania</h3>
+                                    <p className="mb-4 text-[11pt]">
+                                        Punktacja: <strong>1 pkt</strong> za każdą poprawną odpowiedź.
+                                        Maksymalna liczba punktów do zdobycia: <strong>{test.questions.length}</strong>.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-[11pt]">
+                                        <div className="flex justify-between border-b border-slate-200 print:border-slate-300 border-dashed pb-1">
+                                            <span className="font-semibold">0% - 29%</span> <span>niedostateczny</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 print:border-slate-300 border-dashed pb-1">
+                                            <span className="font-semibold">70% - 84%</span> <span>dobry</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 print:border-slate-300 border-dashed pb-1">
+                                            <span className="font-semibold">30% - 49%</span> <span>dopuszczający</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 print:border-slate-300 border-dashed pb-1">
+                                            <span className="font-semibold">85% - 94%</span> <span>bardzo dobry</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 print:border-slate-300 border-dashed pb-1">
+                                            <span className="font-semibold">50% - 69%</span> <span>dostateczny</span>
+                                        </div>
+                                        <div className="flex justify-between border-b border-slate-200 print:border-slate-300 border-dashed pb-1">
+                                            <span className="font-semibold">95% - 100%</span> <span>celujący</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        ))}
+
+                        {/* Strona z kluczem odpowiedzi dla nauczyciela */}
+                        <div className="bg-white p-10 print:p-4 shadow-md print:shadow-none page-break">
+                            <div className="border-b-2 border-slate-800 mb-8 pb-4 flex items-center space-x-3">
+                                <IconCheckSquare className="w-8 h-8 text-slate-800" />
+                                <h2 className="text-3xl font-bold uppercase tracking-wider">Klucz odpowiedzi (Tylko dla Nauczyciela)</h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 font-sans">
+                                {generatedData.keys.map((keyObj, index) => (
+                                    <div key={index} className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                                        <h3 className="text-xl font-bold mb-4 border-b pb-2">{keyObj.variantName}</h3>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                            {keyObj.answers.map((ans, ansIdx) => (
+                                                <div key={ansIdx} className="text-base font-medium">
+                                                    {ans}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<TestGenerator />);
+</script>
+</body>
+</html>
