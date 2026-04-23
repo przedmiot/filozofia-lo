@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filozoficzny Trening (Klasa 1)</title>
+
+    <!-- Tailwind CSS (Styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel (Kompilator JSX w przeglądarce) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+<!-- Kontener aplikacji React -->
+<div id="root"></div>
+
+<script type="text/babel">
+    const {useState, useEffect, useRef} = React;
+
+    // --- IKONY SVG (Zastępstwo dla zewnętrznej biblioteki lucide-react) ---
+    const IconBrain = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path
+                d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+            <path
+                d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+        </svg>
+    );
+    const IconInfo = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+    );
+    const IconCheckCircle = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+    );
+    const IconXCircle = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+    );
+    const IconArrowRight = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+        </svg>
+    );
+    const IconRefreshCw = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <polyline points="23 4 23 10 17 10"/>
+            <polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+    );
+    const IconX = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    );
+    const IconVolume2 = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+        </svg>
+    );
+    const IconVolumeX = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <line x1="23" y1="9" x2="17" y2="15"/>
+            <line x1="17" y1="9" x2="23" y2="15"/>
+        </svg>
+    );
+    const IconLightbulb = ({className}) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path
+                d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.9 1.3 1.5 1.5 2.5"/>
+            <path d="M9 18h6"/>
+            <path d="M10 22h4"/>
+        </svg>
+    );
+
+    // --- BAZA PYTAŃ ---
+    const rawQuestions = [
+        {
+            id: 1,
+            q: 'Gdy rozważasz, czy stół, przy którym siedzisz, jest w istocie zbiorem wirujących atomów, czy może tylko wyobrażeniem w Twoim umyśle – badasz naturę rzeczywistości i strukturę bytu. Ten dział filozofii to:',
+            options: ['Epistemologia', 'Estetyka', 'Ontologia', 'Etyka'],
+            ans: 2,
+            trivia: 'Słowo "ontologia" wprowadzono dopiero w XVII wieku. Arystoteles, zajmując się bytem, nazywał tę dziedzinę po prostu "filozofią pierwszą".',
+            hint: 'Zwróć uwagę na "byt". Szukamy dziedziny, która bada to, co istnieje (od greckiego "ontos").'
+        },
+        {
+            id: 2,
+            q: 'Filozofia wywodzi się z przejścia od wyjaśniania świata za pomocą mitów i kaprysów bogów do racjonalnego, logicznego myślenia. To historyczne przejście nazywamy potocznie przejściem:',
+            options: ['Od Chaosu do Kosmosu.', 'Od Mitu do Logosu.', 'Od Jaskini do Światła.', 'Od Homera do Homera Simpsona.'],
+            ans: 1,
+            trivia: 'Mówi się, że początek "Logosu" wyznacza rok 585 p.n.e., kiedy to Tales z Miletu jako pierwszy dokładnie przewidział zaćmienie Słońca, udowadniając powtarzalność praw natury.',
+            hint: 'Zastanów się nad przejściem od opowieści o bogach (mitów) do racjonalnego rozumu i słowa (logosu).'
+        },
+        {
+            id: 3,
+            q: 'Tales z Miletu szukał "arche", czyli prazasady wszystkiego, z której powstał świat. Doszedł do wniosku, że jest to:',
+            options: ['Ogień, bo wszystko płonie.', 'Liczba, bo natura rzeczywistości jest matematyczna.', 'Woda, bo życie potrzebuje wilgoci, a Ziemia unosi się na oceanie.', 'Powietrze, bo bez niego nie da się oddychać.'],
+            ans: 2,
+            trivia: 'Tales przypisywał duszę przedmiotom nieożywionym – twierdził na przykład, że magnes musi mieć duszę, ponieważ potrafi poruszać żelazo.',
+            hint: 'Pomyśl o substancji, która zajmuje ponad 70% powierzchni Ziemi i bez której każda roślina od razu usycha.'
+        },
+        {
+            id: 4,
+            q: 'Twój kolega narzeka, że "nic nie jest już takie samo", a "czas ucieka i wszystko się zmienia". Z którym filozofem z Efezu, autorem słów "Panta rhei" (wszystko płynie), na pewno by się dogadał?',
+            options: ['Z Parmenidesem', 'Z Heraklitem', 'Z Anaksymenesem', 'Z Demokrytem'],
+            ans: 1,
+            trivia: 'Heraklit był znany w starożytności pod przydomkiem "Ciemny", z powodu jego bardzo zagmatwanego, metaforycznego stylu wypowiedzi.',
+            hint: 'Zwróć uwagę na rzekę. Ten myśliciel uważał, że nie da się wejść dwa razy do tej samej rzeki, bo ciągle płyną w niej nowe wody.'
+        },
+        {
+            id: 5,
+            q: 'Gdyby Parmenides był Twoim nauczycielem wuefu, prawdopodobnie kazałby Ci usiąść w ławce. Dlaczego?',
+            options: ['Uważał, że byt jest, niebytu nie ma, a ponieważ ruch wymaga "pustki", to ruch jest logicznie niemożliwy.', 'Wierzył, że sport oddala nas od Idei Dobra.', 'Był materialistą i uważał, że mięśnie to tylko atomy.', 'Twierdził, że jedyny prawdziwy ruch to pływanie.'],
+            ans: 0,
+            trivia: 'Parmenides swoje trudne, logiczne wywody o niezmienności Bytu ubrał w formę pięknego poematu heksametrycznego o wizycie u bogini Prawdy.',
+            hint: 'Skoro ruch wymaga pustego miejsca (niebytu), a logicznie rzecz biorąc "niebyt nie istnieje", to czy możemy się w ogóle poruszyć?'
+        },
+        {
+            id: 6,
+            q: 'Achilles ścigający żółwia to słynny paradoks, który miał dowodzić, że ruch nie istnieje. Kto wymyślił tę logiczną łamigłówkę?',
+            options: ['Platon', 'Sokrates', 'Zenon z Elei', 'Arystoteles'],
+            ans: 2,
+            trivia: 'Paradoksy Zenona przez dwa tysiąclecia spędzały sen z powiek matematykom, aż do wynalezienia rachunku różniczkowego i całkowego w XVII w.',
+            hint: 'Ten filozof to wierny uczeń Parmenidesa, prawdziwy starożytny mistrz wymyślania aporii (nierozwiązywalnych zagadek).'
+        },
+        {
+            id: 7,
+            q: '"Wszystko składa się z małych, niewidzialnych i niepodzielnych klocków". Kto w starożytności brzmiał jak współczesny fizyk kwantowy bawiący się LEGO?',
+            options: ['Pitagoras', 'Demokryt z Abdery', 'Epikur', 'Anaksymander'],
+            ans: 1,
+            trivia: 'Demokryta nazywano "Śmiejącym się filozofem", ponieważ nieustannie bawiła go głupota ludzi goniących za bogactwem i władzą w pustym świecie.',
+            hint: 'Z greckiego "a-tomos" oznacza coś, czego nie da się już dalej rozciąć ani podzielić. Poszukaj twórcy atomizmu.'
+        },
+        {
+            id: 8,
+            q: 'Pitagorejczycy mieli obsesję na punkcie matematyki. Uważali, że zasada świata (arche) to nie żadna woda czy ogień, ale:',
+            options: ['Złoto', 'Liczba i proporcja', 'Muzyka sfer', 'Bóg jako demiurg'],
+            ans: 1,
+            trivia: 'Bractwo pitagorejczyków było tajną sektą. Wyznawali m.in. reinkarnację i objęli swoich wyznawców bezwzględnym zakazem jedzenia... bobu.',
+            hint: 'Znasz jego słynne twierdzenie o trójkącie prostokątnym. Skoro był matematykiem, na czym opierał strukturę kosmosu?'
+        },
+        {
+            id: 9,
+            q: 'Sofiści (jak Protagoras) byli w starożytności kimś w rodzaju płatnych korepetytorów i adwokatów. Nauczali m.in. erystyki. Co to takiego?',
+            options: ['Sztuka logicznego poszukiwania prawdy.', 'Sztuka układania wierszy.', 'Sztuka wygrywania sporów i przekonywania do swoich racji za wszelką cenę.', 'Sztuka rzeźbienia w marmurze.'],
+            ans: 2,
+            trivia: 'Fakt pobierania zapłaty za nauczanie mądrości był dla tradycyjnych Greków (jak Sokrates) bardzo gorszący, uważano to wręcz za wandalizm intelektualny.',
+            hint: 'Chodzi o bardzo "prawniczą" sztukę, w której nie liczy się dotarcie do obiektywnej prawdy, lecz wygranie debaty.'
+        },
+        {
+            id: 10,
+            q: 'Protagoras powiedział: "Człowiek jest miarą wszechrzeczy". Gdybyś pokłócił się z nim o to, czy pizza z ananasem jest dobra, on by odpowiedział:',
+            options: ['"Prawda jest jedna! Ananas to zbrodnia w świecie Idei!"', '"Zależy dla kogo. Nie ma obiektywnej prawdy, prawda jest względna."', '"Zapytajmy wyroczni."', '"Pizza nie istnieje, to atomy."'],
+            ans: 1,
+            trivia: 'Protagoras został w końcu oskarżony w Atenach o bezbożność, a jego książki oficjalnie spalono na rynku głównym.',
+            hint: 'Skoro każdy człowiek ma własną "miarę" oceny rzeczy, to prawda zależy od konkretnej osoby – czyli jest "względna".'
+        },
+        {
+            id: 11,
+            q: 'Sokrates denerwował ludzi, zadając im tyle pytań, aż sami gubili się w swoich poglądach i odkrywali swą niewiedzę. Ta metoda nosi nazwę:',
+            options: ['Metody majeutycznej', 'Metody elenktycznej (ironii sokratycznej)', 'Metody dedukcyjnej', 'Metody empirycznej'],
+            ans: 1,
+            trivia: 'Sokrates sam siebie nazywał "gzem", a Ateny "wielkim, rasowym, ale leniwym koniem", którego on ma za zadanie kąsać do przebudzenia.',
+            hint: 'Sokrates często udawał naiwnego, głupszego niż był w rzeczywistości, aby poprzez sprytne pytania obalić i oczyścić fałszywe przekonania rozmówcy.'
+        },
+        {
+            id: 12,
+            q: 'Jeśli po uświadomieniu sobie niewiedzy, Sokrates pomagał rozmówcy "urodzić" nową, prawdziwą wiedzę ukrytą w jego duszy, to stosował metodę:',
+            options: ['Majeutyczną (położniczą)', 'Sceptyczną', 'Cyniczną', 'Sylogistyczną'],
+            ans: 0,
+            trivia: 'Matka Sokratesa była akuszerką (położną). Sokrates mówił, że uprawia ten sam zawód, tyle że pomaga rodzić duszom, a nie ciałom.',
+            hint: 'Pomyśl o zawodzie matki Sokratesa – akuszerki (położnej). Metoda ta zakłada, że prawda już jest w człowieku, trzeba ją tylko wyciągnąć na świat.'
+        },
+        {
+            id: 13,
+            q: '"Wiem, że nic nie wiem". Słynne zdanie przypisywane Sokratesowi oznacza w praktyce, że:',
+            options: ['Był bardzo słabym uczniem.', 'Nie posiada boskiej wiedzy, ale w przeciwieństwie do głupców, jest świadomy swoich ograniczeń.', 'Człowiek rodzi się jako czysta karta.', 'Wiedza nie ma żadnego znaczenia.'],
+            ans: 1,
+            trivia: 'Gdy jeden z przyjaciół Sokratesa zapytał Wyrocznię w Delfach, kto jest najmądrzejszym z Greków, ta bez wahania wskazała właśnie Sokratesa.',
+            hint: 'To zdanie nie świadczy o głupocie, wręcz przeciwnie! Świadczy o wielkiej pokorze intelektualnej i dystansie do samego siebie.'
+        },
+        {
+            id: 14,
+            q: 'Uczeń ściąga na teście. Sokrates mówi: "Nikt nie czyni zła dobrowolnie. Zgrzeszyłeś z powodu niewiedzy, czym jest Prawdziwe Dobro". Ten pogląd to:',
+            options: ['Hedonizm', 'Intelektualizm etyczny', 'Fatalizm', 'Złoty Środek'],
+            ans: 1,
+            trivia: 'Sokrates dowodził swojego zrównania odwagi z mądrością również na polu walki – maszerował boso po lodzie, wprawiając żołnierzy w osłupienie.',
+            hint: 'Według tego poglądu wiedza (intelekt) równa się cnocie (etyce). Mądry człowiek to automatycznie dobry człowiek.'
+        },
+        {
+            id: 15,
+            q: 'Świat, który widzimy dookoła, to zdaniem Platona tylko nędzna podróbka. Gdzie według niego znajdują się idealne, ponadczasowe wzorce wszystkich rzeczy?',
+            options: ['W umyśle Arystotelesa', 'W jaskini', 'W Świecie Idei', 'Na górze Olimp'],
+            ans: 2,
+            trivia: 'Prawdziwe imię Platona to Arystokles. Imię "Platon" (czyli "szeroki") nadał mu trener zapasów ze względu na jego atletyczną sylwetkę.',
+            hint: 'Ponieważ w materialnym świecie wszystko gnije i się starzeje, Platon przeniósł doskonałość do odrębnego, wyższego i czystego wymiaru.'
+        },
+        {
+            id: 16,
+            q: 'W micie o jaskini Platona, więźniowie patrzą na cienie rzucane na ścianę. Czym jest wyjście z jaskini na zewnątrz, w blask słońca?',
+            options: ['Odkryciem ognia.', 'Drogą do prawdy i poznaniem Idei Dobra.', 'Dowodem obrotu Ziemi.', 'Ucieczką przed obowiązkami.'],
+            ans: 1,
+            trivia: 'Mit jaskini to jeden z najsilniejszych motywów w kulturze – główna struktura i przekaz słynnego filmu "Matrix" bazują wprost na tej koncepcji.',
+            hint: 'Przebywanie w ciemnej jaskini to zadowalanie się oszustwem. Wyjście na zewnątrz to moment "oświecenia" i spotkania z obiektywnym, jasnym celem.'
+        },
+        {
+            id: 17,
+            q: 'Miłość platoniczna (Eros) w swoim pierwotnym, filozoficznym znaczeniu, to:',
+            options: ['Miłość oparta na kalkulacji.', 'Droga dążenia duszy: od zachwytu pięknym ciałem, do czystej Idei Piękna.', 'Uczucie tylko dla władców.', 'Miłość do samego siebie.'],
+            ans: 1,
+            trivia: 'O koncepcji miłości Platon pisze w słynnym dialogu pt. "Uczta".',
+            hint: 'Oryginalnie nie chodzi wcale o ukrywanie uczuć (tzw. friendzone), ale o proces wznoszenia się: od fascynacji materią, aż ku duchowej perfekcji.'
+        },
+        {
+            id: 18,
+            q: 'W utopijnym Państwie Platona, kto powinien rządzić i sprawować władzę absolutną (bo jako jedyny poznał Ideę Dobra)?',
+            options: ['Żołnierze', 'Filozofowie', 'Rzemieślnicy', 'Obywatele (demokracja)'],
+            ans: 1,
+            trivia: 'Mając nadzieję wcielić w życie model rządu filozofów, Platon pojechał doradzać tyranowi Syrakuz. Niestety, wpadł w niełaskę i sprzedano go na targu niewolników.',
+            hint: 'Zastanów się: kto według Platona jest najbardziej wykształcony, obcuje z prawdą i nigdy nie da się skorumpować chęcią zysku czy władzy?'
+        },
+        {
+            id: 19,
+            q: 'Według Arystotelesa, każda rzecz składa się z materii (np. drewno). Co jest drugim elementem, który nadaje jej ostateczny kształt i właściwości?',
+            options: ['Arche', 'Forma', 'Dusza', 'Apeiron'],
+            ans: 1,
+            trivia: 'Zanim Arystoteles założył własną szkołę, przez kilka lat był prywatnym nauczycielem młodego księcia, późniejszego Aleksandra Wielkiego.',
+            hint: 'Materia to sam budulec (np. glina), ale potrzebuje czegoś jeszcze, by z bezkształtnej bryły przybrać konkretny wyraz (np. wazonu).'
+        },
+        {
+            id: 20,
+            q: 'Ten pogląd Arystotelesa, mówiący o nierozerwalnym połączeniu materii i formy w każdej rzeczy, nosi nazwę:',
+            options: ['Hylemorfizm', 'Dualizm', 'Monizm', 'Panteizm'],
+            ans: 0,
+            trivia: 'Słowo to jest zbitką greckich słów hyle (materia, las) oraz morphe (forma, kształt).',
+            hint: 'Termin ten powstaje z połączenia dwóch greckich słów: "hyle" (czyli materia/drewno) oraz "morphe" (czyli kształt).'
+        },
+        {
+            id: 21,
+            q: 'Arystoteles uważał, że cnota i dobre życie leży pośrodku między skrajnościami (nadmiarem a brakiem). Ta teoria to:',
+            options: ['Zasada Brzytwy Ockhama', 'Doktryna Złotego Środka', 'Ataraksja', 'Imperatyw kategoryczny'],
+            ans: 1,
+            trivia: 'Arystoteles miał w zwyczaju wykładać przechadzając się po ogrodach. Z tego powodu jego szkołę nazwano perypatetyczną (od gr. peripatein – przechadzać się).',
+            hint: 'Odwaga to cnota znajdująca się dokładnie pomiędzy zuchwałością (nadmiarem) a tchórzostwem (brakiem). Szukamy wyważonego ujęcia.'
+        },
+        {
+            id: 22,
+            q: 'Będąc na diecie, masz ochotę zjeść 10 paczek chipsów. Epikur podszedłby do Ciebie i powiedział:',
+            options: ['"Zjedz, życie to tylko cierpienie!"', '"Zjedz, ciągła rozkosz to cel życia."', '"Nie jedz, nastąpi ból brzucha i niepokój. Prawdziwa przyjemność to brak cierpienia ciała (aponia) i spokój duszy (ataraksja)!"', '"Chipsy nie istnieją."'],
+            ans: 2,
+            trivia: 'Dla Epikura najwyższym rodzajem szczęścia wcale nie były dzikie uciechy, ale tzw. "przyjemność statyczna" – czyli stan spokoju, w którym nic nas nie boli.',
+            hint: 'Epikur nie pochwalał ślepego pędu za zachciankami, jeśli na koniec miały przynieść ból, chorobę i kaca. Wolał chłodno kalkulować korzyści.'
+        },
+        {
+            id: 23,
+            q: 'Wielu ludzi kojarzy epikurejczyków z niekończącą się ucztą. Tymczasem sam Epikur uważał, że do szczęścia najbardziej potrzebujemy:',
+            options: ['Ogromnego majątku.', 'Władzy politycznej.', 'Zwykłego chleba, wody i grona zaufanych przyjaciół.', 'Ciągłych podróży.'],
+            ans: 2,
+            trivia: 'Epikur uważał przyjaźń za najważniejsze z dóbr w życiu człowieka. Jego szkoła nazywała się "Ogród" i działała jak skromna komuna znajomych.',
+            hint: 'Do stabilnej i niesłabnącej radości nie potrzeba pałaców, wystarczy zaspokoić głód i mieć z kim miło spędzić czas na rozmowie.'
+        },
+        {
+            id: 24,
+            q: 'Spóźniłeś się na autobus i pada deszcz. Filozof stoicki poradziłby Ci:',
+            options: ['"Idź protestować."', '"Nie masz wpływu na awarie, ale masz kontrolę nad swoją reakcją. Skup się na tym, na co masz wpływ."', '"Zamieszkaj w beczce."', '"Przeznaczenie jest złe, walcz z nim."'],
+            ans: 1,
+            trivia: 'Założyciel stoicyzmu, Zenon z Kition, był kupcem morskim. Gdy jego statek z całym majątkiem zatonął, porzucił handel i zaczął studiować filozofię.',
+            hint: 'Główna idea stoicka, tzw. "dychotomia kontroli", radzi: nie stresuj się tym, na co kompletnie nie masz wpływu (np. pogoda).'
+        },
+        {
+            id: 25,
+            q: 'Cynik, Diogenes z Synopy, biegał za dnia z latarnią i mówił, że "szuka człowieka". Co przez to chciał wyrazić?',
+            options: ['Że brakuje ulicznych latarń.', 'Wyśmiewał zepsute, pędzące za bogactwem społeczeństwo, uważając, że zatracili oni wolną, naturalną naturę.', 'Że słońce zgaśnie.', 'Prowadził eksperymenty wzrokowe.'],
+            ans: 1,
+            trivia: 'Kiedy Aleksander Wielki zapytał Diogenesa: "Co mogę dla ciebie zrobić?", Diogenes odpowiedział ze swojej beczki: "Odsuń się, bo zasłaniasz mi słońce".',
+            hint: 'Cynicy gardzili polityką, modą i sztucznymi obyczajami. Chcieli ukazać grekom, jak wysoce zatracili własną autentyczność.'
+        },
+        {
+            id: 26,
+            q: 'W dyskusji o tym, czy obcy istnieją, Sceptyk napisałby komentarz:',
+            options: ['"Znam prawdę, zaraz ją wyłożę."', '"Zawieszam swój sąd (epoche). Umysł ludzki nie może tego rozstrzygnąć, wolę święty spokój (ataraksję)."', '"Obcy to idee Platona."', '"Udowodnię, że wy wszyscy się mylicie."'],
+            ans: 1,
+            trivia: 'Legendy głoszą, że sceptyk Piron tak usilnie nie dowierzał swoim zmysłom, że mijał rozpędzone rydwany, a przyjaciele wciąż musieli go ratować przed zderzeniem.',
+            hint: 'Skoro zmysły mogą kłamać, a dowodów wciąż brak, mądry Sceptyk wybiera ucieczkę od bezcelowych kłótni.'
+        },
+        {
+            id: 27,
+            q: 'Słyszysz: "Wszyscy ludzie są śmiertelni. Sokrates jest człowiekiem. Więc Sokrates jest śmiertelny." Ten klasyczny schemat logicznego wnioskowania Arystotelesa, to:',
+            options: ['Paradoks', 'Sylogizm', 'Aporia', 'Błędne koło'],
+            ans: 1,
+            trivia: 'Sylogistyka Arystotelesa była na tyle genialna i kompletna, że przez prawie dwa tysiące lat nikt nie potrafił dodać niczego rewolucyjnego w dziedzinie logiki formalnej.',
+            hint: 'To podstawowy, trójelementowy schemat wnioskowania dedukcyjnego wymyślony w starożytności (dwie przesłanki dające jeden wniosek).'
+        },
+        {
+            id: 28,
+            q: 'Twój rozmówca mówi: "Uważam, że nie ma jednej, obiektywnej prawdy. Każdy ma po prostu swoją własną". Taka postawa to:',
+            options: ['Dogmatyzm', 'Dualizm', 'Relatywizm poznawczy', 'Intelektualizm etyczny'],
+            ans: 2,
+            trivia: 'Relatywizm był sztandarowym poglądem sofistów (np. Protagorasa). Sokrates i Platon walczyli z nim, szukając absolutnych i twardych definicji.',
+            hint: 'Jeśli twierdzisz, że ostateczny wynik zawsze zależy od subiektywnego punktu widzenia, głosisz pogląd "względny".'
+        },
+        {
+            id: 29,
+            q: 'Dualizm ontologiczny (popularny u Platona) polega na wierze, że:',
+            options: ['Świat składa się tylko z materii.', 'Świat i człowiek dzieli się na dwa wymiary: fizyczne ciało i niematerialną duszę.', 'W państwie musi być 2 królów.', 'Świat to woda i ogień.'],
+            ans: 1,
+            trivia: 'Późniejszy dualizm najsilniej reprezentował Kartezjusz, uważał on, że całkowicie niematerialna dusza steruje fizycznym mózgiem za pomocą gruczołu szyszynki.',
+            hint: 'Słowo to wywodzi się wprost z łaciny (duo = dwa). Oznacza ścisły podział całości na dwa różne, niezależne od siebie czynniki.'
+        },
+        {
+            id: 30,
+            q: 'Św. Tomasz z Akwinu chciał połączyć racjonalny rozum z wiarą religijną. Jego najsłynniejsze dokonanie to:',
+            options: ['Opisanie struktury piekła.', 'Sformułowanie 5 racjonalnych dróg (dowodów) na istnienie Boga (np. argument pierwszego poruszyciela).', 'Teoria o reinkarnacji.', 'Odrzucenie pism Arystotelesa.'],
+            ans: 1,
+            trivia: 'Jako młody mnich, św. Tomasz był tak masywnej postury i tak rzadko się odzywał, że jego bardziej przebojowi koledzy w klasztorze przezywali go "Milczącym Wołem".',
+            hint: 'Nie bazował tylko na emocjach i objawieniu, ale podjął próbę chłodnego i matematycznego "udowodnienia" istnienia Stwórcy.'
+        },
+        {
+            id: 31,
+            q: 'Tłumaczysz komuś: "Ta książka jest bardzo usypiająca, ponieważ ma silne właściwości powodujące zasypianie". Jaki błąd tu widać?',
+            options: ['Błędne koło (Idem per idem / tłumaczenie tego samego przez to samo).', 'Atak personalny (argumentum ad hominem).', 'Dowód z niewiedzy.', 'Aporia.'],
+            ans: 0,
+            trivia: 'Błędy w definiowaniu pojęć spędzały Grekom sen z powiek. To właśnie chęć uniknięcia takich pomyłek przyczyniła się do narodzin potężnej gałęzi matematyki - logiki.',
+            hint: 'Argumentacja ta tak naprawdę zamyka się w zapętlonej strukturze, nie wnosząc do rozmowy żadnych dodatkowych informacji.'
+        },
+        {
+            id: 32,
+            q: 'Święty Augustyn mierzył się z pytaniem: skoro Bóg jest dobry, skąd wzięło się zło? Filozof odpowiedział, że:',
+            options: ['Zło to bóg ciemności walczący z Bogiem światła.', 'To wina kosmitów.', 'Zło samo w sobie nie istnieje. Jest jedynie brakiem lub zepsuciem dobra (jak ciemność to tylko brak światła).', 'Świat zawsze był zły.'],
+            ans: 2,
+            trivia: 'Przed nawróceniem, Augustyn należał do sekty manichejczyków, wierzących, że świat jest dosłownym polem wielkiej bitwy między równorzędnymi bogami Światła i Ciemności.',
+            hint: 'Tak jak cień nie jest cząsteczką fizyczną "Cienia", a jedynie miejscem do którego nie dotarło słońce, tak zło wg Augustyna to tylko obszar "niedoboru" dobra.'
+        },
+        {
+            id: 33,
+            q: 'Zjedzenie talerza ciepłej, pospolitej zupy, gdy jesteśmy głodni, to w klasyfikacji Epikura poszukiwanie przyjemności:',
+            options: ['Naturalnej i koniecznej.', 'Naturalnej, ale niekoniecznej.', 'Nienaturalnej i niekoniecznej (próżnej).', 'Czysto abstrakcyjnej.'],
+            ans: 0,
+            trivia: 'Epikur kładł nacisk na skromność. Mawiał: "Poślij mi kawałek zwykłego sera, abym mógł zaszaleć w moje urodziny".',
+            hint: 'Jedzenie jest zgodne z naszą wrodzoną, ludzką naturą, a jednocześnie jest niezbędne i wymagane, żeby utrzymać się przy życiu.'
+        },
+        {
+            id: 34,
+            q: 'Zgodnie z klasyczną etyką stoicką, mądry człowiek powinien żyć:',
+            options: ['Zgodnie z namiętnościami ciała.', 'Zgodnie z naturą (Logosem), używając rozumu do zapanowania nad nieuporządkowanymi emocjami.', 'Odludnie, w jaskini.', 'Buntując się na niesprawiedliwość losu.'],
+            ans: 1,
+            trivia: 'Znakomity stoik Marek Aureliusz był cesarzem, który największym imperium rzymskim zarządzał z wojskowego namiotu, pisząc wieczorami pokorne notatki do samego siebie.',
+            hint: 'Dla Stoików cały wszechświat (Natura) to doskonale ułożony mechanizm pełen rozumu. Powinniśmy się do niego dostroić, zachowując chłodną głowę.'
+        },
+        {
+            id: 35,
+            q: 'Kiedy znajomy fan black metalu twierdzi, że "nic nie ma sensu, wiedza to iluzja, obiektywna moralność i prawda to mit", prezentuje on stanowisko zwane:',
+            options: ['Dogmatyzmem', 'Empiryzmem', 'Nihilizmem', 'Optymizmem'],
+            ans: 2,
+            trivia: 'Słowo "nihilizm" pochodzi od łacińskiego "nihil", co oznacza absolutne "nic".',
+            hint: 'Od łacińskiego słowa oznaczającego dosłownie "nic". Oznacza to radykalne odrzucenie wszelkich wartości moralnych i poznawczych.'
+        },
+        {
+            id: 36,
+            q: 'Arystoteles uznał, że ze względu na fakt używania mowy (rozumu) człowiek z natury musi dążyć do tworzenia grup i państw. Nazwał go:',
+            options: ['Homo faber', 'Homo ludens', 'Zoon politikon (zwierzę polityczne/społeczne)', 'Homo sapiens'],
+            ans: 2,
+            trivia: 'Arystoteles uważał, że człowiek, który dobrowolnie odcina się od państwa i żyje w izolacji, musi być "albo bestią, albo samym bogiem".',
+            hint: 'Greckie słowo "Zoon" oznacza istotę żywą/zwierzę, natomiast dopełnienie dotyczy tworzenia struktur miejskich (polis).'
+        },
+        {
+            id: 37,
+            q: 'Sokrates opowiadał, że postępuje uczciwie, ponieważ słucha swojego wewnętrznego, duchowego głosu (sumienia). Nazywał go:',
+            options: ['Logos', 'Daimonion', 'Apeiron', 'Ataraksja'],
+            ans: 1,
+            trivia: 'Głos ten miał fascynującą cechę: nigdy niczego Sokratesowi nie nakazywał! Zawsze wyłącznie mu odradzał i powstrzymywał przed najgorszymi decyzjami.',
+            hint: 'Brzmi to słowo podobnie do "demona", jednak w starożytnej grecji oznaczało ono po prostu pomocne bóstwo opiekuńcze.'
+        },
+        {
+            id: 38,
+            q: 'Czym dokładnie i konkretnie zajmuje się gałąź filozofii zwana epistemologią?',
+            options: ['Ocenianiem sztuki.', 'Teorią poznania: badaniem źródeł, granic i prawdziwości naszej wiedzy (np. sporem zmysły vs rozum).', 'Organizacją państwa.', 'Etyką chrześcijańską.'],
+            ans: 1,
+            trivia: 'Wyraz pochodzi od zbitki greckich słów: episteme (twarda wiedza naukowa) i logos (nauka).',
+            hint: 'Słowo to wywodzi się od greckiego "episteme", co oznacza pewną i ugruntowaną wiedzę.'
+        },
+        {
+            id: 39,
+            q: 'W dyskusji o ochronie klimatu atakujesz oponenta, wypominając mu wiek i fryzurę, ignorując sam temat ocieplenia. Stosujesz błąd logiczny:',
+            options: ['Ignoratio elenchi.', 'Argumentum ad hominem (atak na człowieka).', 'Brzytwę Ockhama.', 'Panta rhei.'],
+            ans: 1,
+            trivia: 'Niestety, choć greccy logicy obnażyli niemerytoryczność tego błędu ponad dwa tysiące lat temu, współcześni politycy stosują go niemal w każdej telewizyjnej debacie.',
+            hint: 'Ten błąd z łaciny nazywa się atakiem skierowanym osobiście i uderzającym prosto w "człowieka".'
+        },
+        {
+            id: 40,
+            q: 'Jeżeli uważasz, że zmysły (wzrok, dotyk) nieustannie kłamią, a jedynym w 100% pewnym źródłem wiedzy jest chłodna kalkulacja i czysty rozum, to jesteś:',
+            options: ['Empirystą', 'Racjonalistą', 'Nihilistą', 'Fizykiem'],
+            ans: 1,
+            trivia: 'Za najsłynniejszego starożytnego racjonalistę uważa się Platona, który twierdził, że prawdziwa wiedza polega wyłącznie na przypominaniu sobie niematerialnych Idei z przeszłego życia.',
+            hint: 'Od łacińskiego słowa "ratio", które oznacza właśnie sprawny, operujący dedukcją rozum.'
+        },
+        {
+            id: 41,
+            q: 'Platon w utopijnym "Państwie" podzielił obywateli na trzy grupy (kasty), pasujące do części ludzkiej duszy. Były to warstwy:',
+            options: ['Nauczycieli, uczniów, rzemieślników.', 'Władców (filozofów), Strażników (wojowników) i żywicieli (chłopów/rzemieślników).', 'Niewolników i szlachty.', 'Króla i kapłanów.'],
+            ans: 1,
+            trivia: 'Dla utrzymania porządku kastowego w państwie, Platon zaplanował rozpowszechnienie "Szlachetnego Kłamstwa" – mitu głoszącego, że bogowie wtłaczają do ludzkich dusz różne kruszce (złoto, żelazo).',
+            hint: 'Kto w państwie symbolizuje rozum? Kto męstwo i siłę zbrojną? A kto zaopatruje pozostałych poprzez żmudną i wytwórczą pracę?'
+        },
+        {
+            id: 42,
+            q: 'Pamiętamy Go jako jedną z najważniejszych postaci w dziejach, jednak on sam uważał pisanie tekstów za "zabijanie myśli" i nie spisał ani jednego słowa. To:',
+            options: ['Tales', 'Arystoteles', 'Sokrates', 'św. Tomasz'],
+            ans: 2,
+            trivia: 'Sokrates brzydził się spisywaniem dyskusji uważał, że tekst rzucony na papirus jest martwy i – w przeciwieństwie do żywego człowieka – nie potrafi się merytorycznie bronić przed krytyką.',
+            hint: 'Uważał, że prawdę da się wypracować tylko i wyłącznie w żywym, ustnym dialogu twarzą w twarz. Spisał go dopiero jego uczeń – Platon.'
+        },
+        {
+            id: 43,
+            q: 'Arystoteles uporządkował i spisał niezawodne zasady bezbłędnego rozumowania (jak zasada niesprzeczności). Uważa się go za ojca dziedziny zwanej:',
+            options: ['Astrologią', 'Logiką formalną', 'Fizyką kwantową', 'Erystyką'],
+            ans: 1,
+            trivia: 'Pierwsze próby zaprogramowania wczesnej "Sztucznej Inteligencji" w latach 70. XX wieku oparte były wprost o zbiory reguł i sylogistykę opracowaną przez Arystotelesa!',
+            hint: 'Skoro uporządkował zasady "poprawnego, niezawodnego myślenia i wyciągania wniosków", to stworzył fundamenty dzisiejszej informatyki i matematyki.'
+        },
+        {
+            id: 44,
+            q: 'Klasyczna (tzw. arystotelesowska) definicja prawdy, wykorzystywana również w dzisiejszych sądach, uważa, że zdanie "Pada deszcz" jest prawdziwe tylko wtedy, gdy:',
+            options: ['Wszyscy uwierzą, że pada deszcz.', 'Zapewnia to nam korzyść.', 'Istnieje zgodność naszego osądu z rzeczywistym, faktycznym stanem pogody za oknem.', 'Wymyślił to Platon.'],
+            ans: 2,
+            trivia: 'Arystoteles zdefiniował to potężnym i prostym łamańcem językowym: "Powiedzieć o tym co jest, że nie jest (i na odwrót), to fałsz. Powiedzieć o tym co jest, że jest, a o tym co nie jest, że nie jest – to prawda".',
+            hint: 'Prawda nie rodzi się w demokracji przez głosowanie. Rodzi się z prostej obserwacji – jeśli twierdzę, że ściana jest biała i patrzę na białą ścianę, to mówię prawdę.'
+        },
+        {
+            id: 45,
+            q: 'Zgodnie z tradycją słowo "filozofia" ukuł Pitagoras. Oznacza ono dosłownie i wprost:',
+            options: ['Wszechwiedzę.', 'Umiłowanie (phileo) mądrości (sophia).', 'Odkrywanie prawd ukrytych.', 'Rozmowę w tłumie.'],
+            ans: 1,
+            trivia: 'Pitagoras wymyślił to określenie z wrodzonej skromności. Twierdził, że bycie pełnym mędrcem (sophos) zarezerwowane jest dla stwórcy, my możemy tylko tę mądrość "kochać i gonić".',
+            hint: 'Wyraz wywodzi się z dwóch cząstek: phileo (co po grecku oznacza kochać) oraz sophia (mądrość).'
+        },
+        {
+            id: 46,
+            q: 'Zalecane przez starożytnych Sceptyków "epoche", które miało zminimalizować ból egzystencjalny, polega na:',
+            options: ['Ciągłym zawieszaniu i powstrzymywaniu się od wydawania pochopnych sądów, by zachować spokój.', 'Wspinaczce na święte góry.', 'Łamaniu niesprawiedliwego prawa.', 'Codziennych kąpielach w lodowatej wodzie.'],
+            ans: 0,
+            trivia: 'Nurt sceptycyzmu tryumfalnie wrócił do Europy wieki po upadku Rzymu, kiedy podróżnicy w Epoce Odkryć zdali sobie sprawę z wielości i różnorodności diametralnie różnych praw kultur Ameryki czy Azji.',
+            hint: 'Czym zajmuje się sędzia w sądzie? Zastępstwem tego zajmują się Sceptycy w swoim życiu intelektualnym, odmawiając ostatecznych diagnoz.'
+        },
+        {
+            id: 47,
+            q: 'Słynny rzymski cesarz, który zwykł pisać w wojskowym namiocie. Autor m.in. słów: "Podobny bądź do skały, o którą się ciągle fale rozbijają. A ona stoi, a koło niej usypiają bałwany wody." (Rozmyślania).  Jest to:',
+            options: ['Marek Aureliusz (Stoik)', 'Epikur z Samos (Hedonista)', 'Diogenes z Synopy (Cynik)', 'Protagoras z Abdery (Sofista)'],
+            ans: 0,
+            trivia: 'Księga "Rozmyślań" Marka Aureliusza – zbiór autoterapeutycznych rad jak przetrwać jako cesarz nie stając się tyranem – uznawana jest za jeden z najwybitniejszych zachowanych tekstów antyku.',
+            hint: 'Motyw zachowywania twardego niczym głaz, niezachwianego i "stoickiego spokoju" na wszystkie życiowe burze zdradza nam właściwą odpowiedź.'
+        },
+        {
+            id: 48,
+            q: 'Aporia – np. łamigłówka Zenona o strzale w locie – w sensie filozoficznym i intelektualnym oznacza:',
+            options: ['Ulicę w Atenach.', 'Logiczny kłopot, zagadnienie bez widocznego wyjścia, często pełne pozornie nierozwiązywalnych sprzeczności.', 'Duchowe oczyszczenie w teatrze (Katharsis).', 'Picie wina na ucztach.'],
+            ans: 1,
+            trivia: 'Sam Zenon na zadawaniu tak irytujących łamigłówek nie wyszedł zbyt dobrze politycznie – za zaangażowanie w spiski polityczne w swym mieście został rzekomo pojmany i brutalnie stracony.',
+            hint: 'Z greckiego słowo to oznaczało "brak przejścia", trudność nie do przeskoczenia.'
+        },
+        {
+            id: 49,
+            q: 'Pierwsi filozofowie tzw. "presokratycy" rozważali czy wszechświat powstał z żywiołu wody, ognia lub powietrza, tudzież bezkresu. Współcześnie ich odpowiednikiem są zatem naukowcy z wydziału:',
+            options: ['Socjologii', 'Fizyki, chemii i nauk o przyrodzie (np. kosmologii)', 'Psychologii zwierząt', 'Sztuk Pięknych'],
+            ans: 1,
+            trivia: 'Jako pierwsi badacze starali się ujednolicić strukturę i zachowanie przyrody. Od nazwy Milet czy Efez – ich działalność powszechnie określa się często "jońską filozofią przyrody".',
+            hint: 'Pytania z czego zbudowana jest w makroskali kosmiczna materia i gwiazdy nie należą dziś do filozofii – przejęły to tzw. twarde, laboratoryjne nauki ścisłe.'
+        },
+        {
+            id: 50,
+            q: 'Wyobraź sobie, że stoisz po stronie poglądu iż "nasz mózg przy narodzinach to kompletnie czysta, niezapisana pusta karta (tabula rasa), a każdą wiedzę dostarczamy sobie WYŁĄCZNIE używając rąk, uszu i wzroku w realnym świecie." Popierasz tym samym:',
+            options: ['Empiryzm', 'Dualizm idealny', 'Nihilizm', 'Solipsyzm'],
+            ans: 0,
+            trivia: 'Za najwcześniejszego prekursora podwalin empiryzmu uważa się Arystotelesa. Pełna koncepcja "tabula rasa" rozwinęła się później u Johna Locke’a.',
+            hint: 'Stanowisko to wywodzi się od słowa "empiria" – czyli namacalnego i fizycznego zbierania doświadczeń.'
+        }
+    ];
+
+    // Fisher-Yates (tasowanie pytań)
+    function shuffleArray(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function App() {
+        const [queue, setQueue] = useState([]);
+        const [masteredCount, setMasteredCount] = useState(0);
+        const totalQuestions = rawQuestions.length;
+
+        const [selectedOption, setSelectedOption] = useState(null);
+        const [hasAnswered, setHasAnswered] = useState(false);
+        const [isCorrect, setIsCorrect] = useState(null);
+        const [showTrivia, setShowTrivia] = useState(false);
+        const [showHint, setShowHint] = useState(false);
+        const [isFinished, setIsFinished] = useState(false);
+
+        const [soundEnabled, setSoundEnabled] = useState(true);
+
+        // Audio Context synthesis (no external assets required)
+        const playSound = (type) => {
+            if (!soundEnabled) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    // High, happy "ding" (C5, fading quickly)
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.05); // quick slide to A5
+                    gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    // Low, descending "buzz"
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.3);
+                    gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'click') {
+                    // Subtle UI click
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(400, ctx.currentTime);
+                    gainNode.gain.setValueAtTime(0.02, ctx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.05);
+                }
+            } catch (e) {
+                console.log("Audio not supported or blocked by browser.");
+            }
+        };
+
+        useEffect(() => {
+            startQuiz();
+        }, []);
+
+        const startQuiz = () => {
+            setQueue(shuffleArray([...rawQuestions]));
+            setMasteredCount(0);
+            setSelectedOption(null);
+            setHasAnswered(false);
+            setIsCorrect(null);
+            setShowTrivia(false);
+            setShowHint(false);
+            setIsFinished(false);
+        };
+
+        const handleOptionClick = (idx) => {
+            if (hasAnswered) return;
+
+            setSelectedOption(idx);
+            setHasAnswered(true);
+
+            const currentQ = queue[0];
+            if (idx === currentQ.ans) {
+                setIsCorrect(true);
+                playSound('correct');
+                setMasteredCount((prev) => prev + 1);
+            } else {
+                setIsCorrect(false);
+                playSound('wrong');
+            }
+        };
+
+        const handleNext = () => {
+            playSound('click');
+            const currentQ = queue[0];
+            let newQueue = [...queue];
+            newQueue.shift(); // Remove from front
+
+            if (!isCorrect) {
+                newQueue.push(currentQ); // Move to the end if wrong
+            }
+
+            if (newQueue.length === 0) {
+                setIsFinished(true);
+            } else {
+                setQueue(newQueue);
+                setSelectedOption(null);
+                setHasAnswered(false);
+                setIsCorrect(null);
+                setShowTrivia(false);
+                setShowHint(false);
+            }
+        };
+
+        if (isFinished) {
+            return (
+                <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans text-slate-800">
+                    <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-xl max-w-lg w-full text-center">
+                        <div
+                            className="w-20 h-20 sm:w-24 sm:h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <IconCheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-600"/>
+                        </div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-4">Gratulacje!</h1>
+                        <p className="text-sm sm:text-base text-slate-600 mb-8">
+                            Udało Ci się opanować całe 50 zagadnień z filozofii. Egzamin to będzie czysta formalność.
+                        </p>
+                        <button
+                            onClick={startQuiz}
+                            className="flex items-center justify-center space-x-2 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 sm:py-4 px-6 rounded-2xl font-semibold transition-all active:scale-95"
+                        >
+                            <IconRefreshCw className="w-5 h-5"/>
+                            <span>Rozpocznij ponownie</span>
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        if (queue.length === 0) return null; // Loading stat buffer
+
+        const currentQ = queue[0];
+
+        return (
+            <div
+                className="min-h-screen bg-slate-100 py-4 sm:py-8 px-3 sm:px-6 font-sans text-slate-800 flex justify-center selection:bg-indigo-200">
+                <div className="max-w-3xl w-full flex flex-col">
+
+                    {/* Header / Progress Bar */}
+                    <div
+                        className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center justify-between w-full sm:w-auto">
+                            <div className="flex items-center space-x-3 sm:space-x-4">
+                                <div className="bg-indigo-50 p-2 sm:p-3 rounded-xl hidden xs:block">
+                                    <IconBrain className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-500"/>
+                                </div>
+                                <div>
+                                    <h1 className="text-lg sm:text-xl font-bold text-slate-800 leading-tight">Filozoficzny
+                                        Trening</h1>
+                                    <p className="text-xs sm:text-sm text-slate-500">Pozostało w puli: <span
+                                        className="font-semibold">{queue.length}</span></p>
+                                </div>
+                            </div>
+
+                            {/* Audio Toggle (Mobile friendly placement) */}
+                            <button
+                                onClick={() => {
+                                    setSoundEnabled(!soundEnabled);
+                                    playSound('click');
+                                }}
+                                className="sm:hidden p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-full transition-colors"
+                                aria-label="Wycisz/Włącz dźwięk"
+                            >
+                                {soundEnabled ? <IconVolume2 className="w-6 h-6"/> : <IconVolumeX className="w-6 h-6"/>}
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                            <button
+                                onClick={() => {
+                                    setSoundEnabled(!soundEnabled);
+                                    playSound('click');
+                                }}
+                                className="hidden sm:block p-2 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 rounded-full transition-colors"
+                                title="Wycisz/Włącz dźwięki"
+                            >
+                                {soundEnabled ? <IconVolume2 className="w-5 h-5"/> : <IconVolumeX className="w-5 h-5"/>}
+                            </button>
+                            <div className="w-full sm:w-32 text-left sm:text-right">
+                                <div
+                                    className="text-xs sm:text-sm font-semibold text-indigo-600 mb-1.5 flex justify-between sm:block">
+                                    <span>Opanowane:</span> <span>{masteredCount} / {totalQuestions}</span>
+                                </div>
+                                <div
+                                    className="w-full sm:w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden relative border border-slate-200">
+                                    <div
+                                        className="absolute left-0 top-0 h-full bg-indigo-500 transition-all duration-500 ease-out rounded-full"
+                                        style={{width: `${(masteredCount / totalQuestions) * 100}%`}}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Question Card */}
+                    <div className="bg-white p-5 sm:p-8 rounded-2xl shadow-md mb-6 relative flex-grow flex flex-col">
+                        <div className="flex justify-between items-start gap-4 mb-6 sm:mb-8">
+                            <h2 className="text-base sm:text-lg md:text-xl font-medium leading-relaxed text-slate-800">
+                                {currentQ.q}
+                            </h2>
+                            {!hasAnswered && (
+                                <button
+                                    onClick={() => {
+                                        playSound('click');
+                                        setShowHint(!showHint);
+                                    }}
+                                    className={`shrink-0 flex items-center justify-center p-2.5 sm:p-3 rounded-xl transition-all ${showHint ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-400 hover:text-amber-500 hover:bg-amber-50'}`}
+                                    title="Pokaż naprowadzającą podpowiedź"
+                                >
+                                    <IconLightbulb className="w-5 h-5 sm:w-6 sm:h-6"/>
+                                </button>
+                            )}
+                        </div>
+
+                        {showHint && (
+                            <div
+                                className="mb-6 p-4 sm:p-5 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-xl flex items-start space-x-3 text-amber-900 animate-in fade-in slide-in-from-top-2">
+                                <IconLightbulb className="w-6 h-6 text-amber-500 shrink-0 mt-0.5"/>
+                                <div className="text-sm sm:text-base leading-relaxed">
+                                    <span className="font-bold block mb-1 text-amber-700">Podpowiedź:</span>
+                                    {currentQ.hint}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-8 flex-grow">
+                            {currentQ.options.map((opt, idx) => {
+                                let btnStyle = "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:border-indigo-300";
+                                let textStyle = "";
+
+                                if (hasAnswered) {
+                                    if (idx === currentQ.ans) {
+                                        btnStyle = "bg-green-50 border-green-500 text-green-900 shadow-sm";
+                                        textStyle = "font-medium";
+                                    } else if (idx === selectedOption) {
+                                        btnStyle = "bg-red-50 border-red-500 text-red-900";
+                                    } else {
+                                        btnStyle = "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+                                    }
+                                }
+
+                                return (
+                                    <button
+                                        key={idx}
+                                        onClick={() => handleOptionClick(idx)}
+                                        disabled={hasAnswered}
+                                        className={`w-full text-left p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 flex gap-4 items-center justify-between active:scale-[0.98] ${btnStyle}`}
+                                    >
+                                        <span className={`text-sm sm:text-base leading-snug ${textStyle}`}>{opt}</span>
+                                        {hasAnswered && idx === currentQ.ans && <IconCheckCircle
+                                            className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 shrink-0"/>}
+                                        {hasAnswered && idx === selectedOption && !isCorrect &&
+                                            <IconXCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 shrink-0"/>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Feedback & Actions */}
+                        <div
+                            className="mt-auto border-t border-slate-100 pt-5 sm:pt-6 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+                            <button
+                                onClick={() => {
+                                    playSound('click');
+                                    setShowTrivia(true);
+                                }}
+                                className="flex items-center justify-center space-x-2 text-indigo-600 hover:bg-indigo-50 w-full sm:w-auto px-5 py-3 rounded-xl font-semibold transition-colors border border-transparent hover:border-indigo-100"
+                            >
+                                <IconInfo className="w-5 h-5"/>
+                                <span>Ciekawostka</span>
+                            </button>
+
+                            {hasAnswered && (
+                                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5 w-full sm:w-auto">
+                                        <span
+                                            className={`text-sm sm:text-base font-semibold w-full text-center sm:text-right ${isCorrect ? 'text-green-600' : 'text-red-500'}`}>
+                                            {isCorrect ? "Znakomita odpowiedź!" : "Pytanie powróci na koniec."}
+                                        </span>
+                                    <button
+                                        onClick={handleNext}
+                                        className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-slate-800 hover:bg-slate-900 text-white px-8 py-3.5 sm:py-3 rounded-xl font-semibold transition-all active:scale-95 shadow-md hover:shadow-lg"
+                                    >
+                                        <span>Dalej</span>
+                                        <IconArrowRight className="w-5 h-5"/>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Trivia Dialog (Modal) */}
+                    {showTrivia && (
+                        <div
+                            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm"
+                            onClick={() => setShowTrivia(false)}>
+                            <div
+                                className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 max-w-md w-full relative max-h-[90vh] overflow-y-auto transform transition-all duration-300"
+                                onClick={(e) => e.stopPropagation()} // Zapobieganie zamykaniu po kliknięciu W modal
+                            >
+                                <button
+                                    onClick={() => {
+                                        playSound('click');
+                                        setShowTrivia(false);
+                                    }}
+                                    className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 rounded-full transition-colors"
+                                    aria-label="Zamknij"
+                                >
+                                    <IconX className="w-6 h-6"/>
+                                </button>
+
+                                <div className="flex items-center space-x-4 mb-5 mt-2">
+                                    <div className="p-3 bg-indigo-100 text-indigo-600 rounded-2xl">
+                                        <IconInfo className="w-7 h-7"/>
+                                    </div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Czy wiesz, że...?</h3>
+                                </div>
+
+                                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6">
+                                    <p className="text-slate-700 leading-relaxed text-base sm:text-lg italic">
+                                        "{currentQ.trivia}"
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        playSound('click');
+                                        setShowTrivia(false);
+                                    }}
+                                    className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold py-3.5 rounded-xl transition-colors active:scale-[0.98]"
+                                >
+                                    Zamknij okno
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            </div>
+        );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App/>);
+</script>
+</body>
+</html>
